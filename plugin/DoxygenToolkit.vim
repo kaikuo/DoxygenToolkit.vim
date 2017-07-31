@@ -295,7 +295,7 @@ if !exists("g:DoxygenToolkit_paramTag_pre")
   let g:DoxygenToolkit_paramTag_pre = "@param "
 endif
 if !exists("g:DoxygenToolkit_paramTag_post")
-  let g:DoxygenToolkit_paramTag_post = ""
+  let g:DoxygenToolkit_paramTag_post = " "
 endif
 if !exists("g:DoxygenToolkit_returnTag")
   let g:DoxygenToolkit_returnTag = "@return "
@@ -731,7 +731,11 @@ function! <SID>DoxygenCommentFunc()
   " Header
   exec "normal `d" 
   if( g:DoxygenToolkit_blockHeader != "" )
-    exec "normal O".strpart( s:startCommentBlock, 0, 1 )
+	  if (s:CheckFileType() == "python")
+		  exec "normal o".strpart( s:startCommentBlock, 0, 1 )
+	  else
+		  exec "normal O".strpart( s:startCommentBlock, 0, 1 )
+	  endif
     exec "normal A".strpart( s:startCommentBlock, 1 ).g:DoxygenToolkit_blockHeader.s:endCommentBlock
     exec "normal `d" 
   endif
@@ -739,7 +743,11 @@ function! <SID>DoxygenCommentFunc()
   " Brief
   if( g:DoxygenToolkit_compactOneLineDoc =~ "yes" && l:doc.returns != "yes" && len( l:doc.params ) == 0 )
     let s:compactOneLineDoc = "yes"
-    exec "normal O".strpart( s:startCommentTag, 0, 1 )
+	  if (s:CheckFileType() == "python")
+		  exec "normal o".strpart( s:startCommentTag, 0, 1 )
+	  else
+		  exec "normal O".strpart( s:startCommentTag, 0, 1 )
+	  endif
     exec "normal A".strpart( s:startCommentTag, 1 ).g:DoxygenToolkit_briefTag_pre
   else
     let s:compactOneLineDoc = "no"
@@ -854,7 +862,11 @@ function! s:StartDocumentationBlock()
   " For C++ documentation format we do not need first empty line
   if( s:startCommentTag != s:interCommentTag )
     "exec "normal O".s:startCommentTag
-    exec "normal O".strpart( s:startCommentTag, 0, 1 )
+	if (s:CheckFileType() == "python" )
+		exec "normal o".strpart( s:startCommentTag, 0, 1 )
+	else
+		exec "normal O".strpart( s:startCommentTag, 0, 1 )
+	endif
     exec "normal A".substitute( strpart( s:startCommentTag, 1 ), "[[:blank:]]*$", "", "" )
     let l:insertionMode = "o"
   else
@@ -1082,12 +1094,21 @@ function! s:InitializeParameters()
     let s:interCommentBlock = g:DoxygenToolkit_interCommentBlock
     let s:endCommentBlock   = g:DoxygenToolkit_endCommentBlock
   else
-    let s:startCommentTag   = "## "
-    let s:interCommentTag   = "# "
-    let s:endCommentTag     = ""
-    let s:startCommentBlock = "# "
-    let s:interCommentBlock = "# "
-    let s:endCommentBlock   = ""
+	  if ( s:CheckFileType() == 'python' )
+		  let s:startCommentTag   = '"""'
+		  let s:interCommentTag   = "# "
+		  let s:endCommentTag     = '"""'
+		  let s:startCommentBlock = "# "
+		  let s:interCommentBlock = "# "
+		  let s:endCommentBlock   = ""
+	  else
+		  let s:startCommentTag   = "## "
+		  let s:interCommentTag   = "# "
+		  let s:endCommentTag     = ""
+		  let s:startCommentBlock = "# "
+		  let s:interCommentBlock = "# "
+		  let s:endCommentBlock   = ""
+	  endif
   endif
 
   " Backup standard comment expension and indentation
